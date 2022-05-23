@@ -1,9 +1,11 @@
+require('./database/database');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const session = require('express-session');
 const { v4: uuid } = require('uuid');
+require('dotenv').config();
 
 // =============================
 
@@ -36,7 +38,7 @@ app.use((req, res, next) => {
 
 const sessionChecker = (req, res, next) => {
     if (req.session.user && req.cookies.user_id) {
-        res.redirect('/dashboard')
+        res.redirect('/dashboard');
     } else {
         next();
     }
@@ -59,4 +61,4 @@ app.get('/signup', sessionChecker, (req, res) => {
 
 // ==============================
 
-app.listen(PORT, () => { console.log(`Server Listening at http://localhost:${PORT}`) })
+app.listen(PORT, () => { console.log(`Server Listening at http://localhost:${PORT}`) });
