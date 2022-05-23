@@ -1,16 +1,27 @@
-require('./database/database');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const session = require('express-session');
+const mongoDBSession = require('connect-mongodb-session')(session);
 const { v4: uuid } = require('uuid');
+require('./database/database.js');
 require('dotenv').config();
 
 // =============================
 
+const routes = require('./routes/route.js');
+// =============================
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+
+const store = new mongoDBSession({
+    uri: process.env.DATABASE,
+    collection: 'sessions'
+})
+
 
 // ==============================
 
@@ -19,45 +30,22 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
     session({
-        key: 'user_id',
         secret: `${ uuid }`,
         resave: false,
         saveUninitialized: false,
+        store: store,
         cookie: { expires: 1000 }
     })
 );
 
 // ==============================
 
-app.use((req, res, next) => {
-    if (req.session.user && req.cookies.user_id) {
-        res.redirect('/dashboard')
-    }
-    next();
-});
-
-const sessionChecker = (req, res, next) => {
-    if (req.session.user && req.cookies.user_id) {
-        res.redirect('/dashboard');
-    } else {
-        next();
-    }
-};
+app.set('view engine', 'ejs');
+app.set('views', './views');
 
 // ==============================
 
-// app.get('/', (req, res) => { res.send('Welcome!') });
-app.get('/', sessionChecker, (req, res) => { res.redirect('/login') });
-
-// ==============================
-
-app.get('/login', sessionChecker, (req, res) => {
-    res.sendFile(__dirname + '/public/login.html');
-});
-
-app.get('/signup', sessionChecker, (req, res) => {
-    res.sendFile(__dirname + '/public/signup.html');
-});
+app.use('/', routes);
 
 // ==============================
 
