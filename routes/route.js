@@ -1,5 +1,5 @@
 const express = require('express');
-const session = require('express-session');
+
 
 // =================================
 
@@ -7,16 +7,19 @@ const router = express.Router();
 
 // =================================
 
-const { loginPage, signupPage } = require('../controllers/user_controls.js');
+const { homePage, loginPage, signupPage, registerUser, loginUser } = require('../controllers/user_controls.js');
 
 // =================================
 
 
 // =================================
 
-router.get('/', loginPage);
-router.post('/login', loginPage);
-router.post('/signup', signupPage);
+router.get('/', homePage);
+router.get('/login', loginPage);
+router.get('/signup', signupPage);
+
+router.post('/signup', registerUser);
+router.post('/login', loginUser);
 
 // =================================
 
