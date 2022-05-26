@@ -24,7 +24,6 @@ app.use(
         resave: false,
         saveUninitialized: false,
         store: store,
-        cookie: { expires: 1000 }
     })
 );
 
@@ -47,8 +46,8 @@ const registerUser = async(req, res) => {
 
     if (userAlreadyExists) {
 
-        res.send('User Already Exists..');
-        // return res.redirect('/signup')
+        // res.send('User Already Exists..');
+        return res.render('alreadyExists', { alert: 'User Already Exists.', title: 'Already Exists' });
 
     } else {
 
@@ -63,7 +62,6 @@ const registerUser = async(req, res) => {
 
         await user.save()
             .then(() => {
-                res.send('User saved to database')
                 return res.redirect('/login')
             })
             .catch(err => {
@@ -81,12 +79,21 @@ const loginUser = async(req, res) => {
     if (!user) {
         return res.send('User not found')
     } else {
+        req.session.user = req.body.email;
         const validPassword = await bcrypt.compare(req.body.password, user.password);
         if (!validPassword) {
             res.send('Invalid password.');
-        }
+        } else {}
+        res.redirect('/dashboard')
     }
-    res.render('dashboard', { title: 'Dashboard' })
+}
+
+const dashboard = (req, res) => {
+    if (req.session.user) {
+        res.render('dashboard', { user: req.session.user, title: 'Dashboard' });
+    } else {
+        res.render('403', { title: 'Unauthorised Access', alert: 'Unauthorised User' })
+    }
 }
 
 // =============================.
@@ -96,5 +103,6 @@ module.exports = {
     loginPage,
     signupPage,
     registerUser,
-    loginUser
+    loginUser,
+    dashboard
 }

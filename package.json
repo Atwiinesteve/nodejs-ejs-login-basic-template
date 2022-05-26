@@ -22,5 +22,8 @@
         "morgan": "^1.10.0",
         "nodemon": "^2.0.16",
         "uuid": "^8.3.2"
+    },
+    "dependencies": {
+        "jsonwebtoken": "^8.5.1"
     }
 }

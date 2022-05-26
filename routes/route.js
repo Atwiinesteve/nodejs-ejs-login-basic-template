@@ -7,7 +7,7 @@ const router = express.Router();
 
 // =================================
 
-const { homePage, loginPage, signupPage, registerUser, loginUser } = require('../controllers/user_controls.js');
+const { homePage, loginPage, signupPage, registerUser, loginUser, dashboard } = require('../controllers/user_controls.js');
 
 // =================================
 
@@ -17,6 +17,7 @@ const { homePage, loginPage, signupPage, registerUser, loginUser } = require('..
 router.get('/', homePage);
 router.get('/login', loginPage);
 router.get('/signup', signupPage);
+router.get('/dashboard', dashboard);
 
 router.post('/signup', registerUser);
 router.post('/login', loginUser);
