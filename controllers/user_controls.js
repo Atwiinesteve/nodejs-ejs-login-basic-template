@@ -1,31 +1,15 @@
 const express = require('express');
 const User = require('../models/User.js');
-const session = require('express-session');
-const mongoDBSession = require('connect-mongodb-session')(session);
 const { v4: uuidv4 } = require('uuid');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser');
+require('dotenv').config();
 
 // =========================================================================
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-// ==============================
-
-const store = new mongoDBSession({
-    uri: process.env.DATABASE,
-    collection: 'sessions'
-})
-
-app.use(
-    session({
-        secret: `${ uuidv4() }`,
-        resave: false,
-        saveUninitialized: false,
-        store: store,
-    })
-);
 
 // ==============================
 
@@ -79,12 +63,27 @@ const loginUser = async(req, res) => {
     if (!user) {
         return res.send('User not found')
     } else {
-        req.session.user = req.body.email;
         const validPassword = await bcrypt.compare(req.body.password, user.password);
         if (!validPassword) {
             res.send('Invalid password.');
-        } else {}
-        res.redirect('/dashboard')
+        } else {
+            const token = jwt.sign({ _id: user._id }, process.env.TOKEN);
+            return res.header('auth-token', token);
+        }
+    }
+}
+
+const auth = (req, res) => {
+    const token = req.header('auth-token');
+    if (!token) {
+        return res.status(401).send('Access Denied');
+    } else {
+        try {
+            const verified = jwt.verify(token, process.env.TOKEN);
+            req.user = verified;
+        } catch (err) {
+            res.send('Invalid Token');
+        }
     }
 }
 
@@ -104,5 +103,6 @@ module.exports = {
     signupPage,
     registerUser,
     loginUser,
-    dashboard
+    dashboard,
+    auth
 }
